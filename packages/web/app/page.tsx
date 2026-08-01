@@ -1,11 +1,60 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button, Card, CardBody } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { connectWallet } from "@/lib/nox";
 import { NoxSwapMark } from "@/components/logo";
 
 export default function Landing() {
+  const router = useRouter();
+  const [connected, setConnected] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const ethereum = (window as any).ethereum;
+    if (!ethereum) {
+      setConnected(false);
+      return;
+    }
+    ethereum
+      .request({ method: "eth_accounts" })
+      .then((accounts: string[]) => setConnected(accounts.length > 0))
+      .catch(() => setConnected(false));
+  }, []);
+
+  const enter = async () => {
+    if (connected) {
+      router.push("/trade");
+      return;
+    }
+    setBusy(true);
+    try {
+      await connectWallet();
+      router.push("/trade");
+    } catch {
+      setBusy(false);
+    }
+  };
+
+  const cta = (size: "md" | "lg") => (
+    <Button
+      color="primary"
+      radius="full"
+      size={size}
+      isLoading={busy || connected === null}
+      startContent={
+        !busy && connected !== null ? (
+          <Icon icon={connected ? "solar:arrow-right-up-bold" : "solar:wallet-money-bold"} width={size === "lg" ? 20 : 18} />
+        ) : undefined
+      }
+      onPress={enter}
+    >
+      {connected ? "Open dashboard" : "Connect wallet"}
+    </Button>
+  );
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
       {/* Top bar */}
@@ -16,15 +65,7 @@ export default function Landing() {
           </div>
           <p className="text-large font-semibold">NoxSwap</p>
         </div>
-        <Button
-          as={Link}
-          href="/app"
-          color="primary"
-          radius="full"
-          startContent={<Icon icon="solar:arrow-right-up-bold" width={18} />}
-        >
-          Launch app
-        </Button>
+        {cta("md")}
       </div>
 
       {/* Hero */}
@@ -40,18 +81,7 @@ export default function Landing() {
           sealed, orders pair off privately, and only the leftover ever trades
           in public.
         </p>
-        <div className="mt-8 flex justify-center">
-          <Button
-            as={Link}
-            href="/app"
-            color="primary"
-            radius="full"
-            size="lg"
-            startContent={<Icon icon="solar:lock-keyhole-bold" width={20} />}
-          >
-            Place a sealed order
-          </Button>
-        </div>
+        <div className="mt-8 flex justify-center">{cta("lg")}</div>
       </div>
 
       {/* Three value cards */}

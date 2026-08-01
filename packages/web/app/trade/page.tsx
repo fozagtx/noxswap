@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
@@ -37,11 +38,28 @@ import {
 import { NoxSwapMark } from "@/components/logo";
 
 type LogLine = { at: string; msg: string; href?: string };
+type View = "trade" | "balances" | "batches" | "activity";
 
 const short = (v: string) => `${v.slice(0, 6)}…${v.slice(-4)}`;
 
+const NAV: { key: View; label: string; icon: string }[] = [
+  { key: "trade", label: "Trade", icon: "solar:lock-keyhole-linear" },
+  { key: "balances", label: "Balances", icon: "solar:wallet-money-linear" },
+  { key: "batches", label: "Batches", icon: "solar:box-linear" },
+  { key: "activity", label: "Activity", icon: "solar:history-linear" },
+];
+
+const segmentedTabClassNames = {
+  tabList: "bg-content2",
+  cursor: "!bg-primary",
+  tab: "data-[selected=true]:!bg-primary rounded-full",
+  tabContent: "group-data-[selected=true]:!text-white",
+};
+
 export default function App() {
+  const router = useRouter();
   const publicClient = useMemo(() => getPublicClient(), []);
+  const [view, setView] = useState<View>("trade");
   const [wallet, setWallet] = useState<WalletClient | null>(null);
   const [account, setAccount] = useState<`0x${string}` | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -99,6 +117,30 @@ export default function App() {
     setEpochInfo({ participants: info[0], closed: info[1], settled: info[2] });
   }, [account, publicClient]);
 
+
+  // Guard: only connected wallets belong here. Adopt an existing MetaMask
+  // authorization silently; otherwise send the visitor back to the landing.
+  useEffect(() => {
+    const ethereum = (window as any).ethereum;
+    if (!ethereum) {
+      router.replace("/");
+      return;
+    }
+    ethereum
+      .request({ method: "eth_accounts" })
+      .then(async (accounts: string[]) => {
+        if (accounts.length === 0) {
+          router.replace("/");
+          return;
+        }
+        const { wallet: w, account: a } = await connectWallet();
+        setWallet(w);
+        setAccount(a);
+      })
+      .catch(() => router.replace("/"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     refresh().catch(() => undefined);
     const t = setInterval(() => refresh().catch(() => undefined), 15_000);
@@ -116,14 +158,6 @@ export default function App() {
       refresh().catch(() => undefined);
     }
   };
-
-  const onConnect = () =>
-    run("connect", async () => {
-      const { wallet: w, account: a } = await connectWallet();
-      setWallet(w);
-      setAccount(a);
-      say(`Wallet connected on ${CHAIN.name}`);
-    });
 
   const writeVault = async (functionName: string, args: unknown[]) => {
     if (!wallet || !account) throw new Error("Connect a wallet first");
@@ -180,7 +214,7 @@ export default function App() {
     });
 
   const onReveal = () =>
-    run("reveal balances", async () => {
+    run("show balance", async () => {
       if (!wallet || !handles) throw new Error("Connect and try again");
       const nox = await getHandleClient(wallet);
       if (handles[0] !== ZERO_HANDLE) {
@@ -261,152 +295,96 @@ export default function App() {
 
   const connected = Boolean(account);
 
-  return (
-    <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
-      {/* Top bar */}
-      <div className="mb-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-large bg-content1 shadow-small">
-            <NoxSwapMark size={26} />
-          </div>
-          <p className="text-large font-semibold">NoxSwap</p>
-        </Link>
-        {connected ? (
-          <Chip
-            color="success"
-            variant="flat"
-            startContent={<Icon icon="solar:wallet-money-linear" width={16} />}
+  const walletBlock = connected ? (
+    <Chip
+      color="success"
+      variant="flat"
+      startContent={<Icon icon="solar:wallet-money-linear" width={16} />}
+    >
+      <span className="font-mono">{short(account!)}</span>
+    </Chip>
+  ) : null;
+
+  const tradeView = (
+    <div className="flex flex-col gap-6">
+      <Card shadow="sm" className="border-small border-default-200">
+        <CardHeader className="flex flex-col items-start px-4 pb-0 pt-4">
+          <p className="text-large">Sealed order</p>
+          <p className="text-small text-default-500">
+            Amount and direction are sealed before anything leaves your browser.
+          </p>
+        </CardHeader>
+        <CardBody className="flex flex-col gap-4 p-4">
+          <Tabs
+            aria-label="Direction"
+            selectedKey={sellToken0 ? "sell0" : "sell1"}
+            onSelectionChange={(k) => setSellToken0(k === "sell0")}
+            radius="full"
+            fullWidth
+            classNames={segmentedTabClassNames}
           >
-            <span className="font-mono">{short(account!)}</span>
-          </Chip>
-        ) : (
+            <Tab key="sell0" title={`Sell ${TOKEN0_SYMBOL} for ${TOKEN1_SYMBOL}`} />
+            <Tab key="sell1" title={`Sell ${TOKEN1_SYMBOL} for ${TOKEN0_SYMBOL}`} />
+          </Tabs>
+          <Input
+            label={`Amount in ${sellToken0 ? TOKEN0_SYMBOL : TOKEN1_SYMBOL}`}
+            placeholder="0.0"
+            variant="bordered"
+            value={intentAmount}
+            onValueChange={setIntentAmount}
+          />
           <Button
             color="primary"
             radius="full"
-            isLoading={busy === "connect"}
-            startContent={busy !== "connect" ? <Icon icon="solar:wallet-money-bold" width={18} /> : undefined}
-            onPress={onConnect}
+            isDisabled={!connected || !intentAmount}
+            isLoading={busy === "place order"}
+            startContent={busy !== "place order" ? <Icon icon="solar:lock-keyhole-bold" width={18} /> : undefined}
+            onPress={onSubmitIntent}
           >
-            Connect wallet
+            Place sealed order
           </Button>
-        )}
-      </div>
+        </CardBody>
+      </Card>
+    </div>
+  );
 
-      {/* Status chips */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Chip size="sm" variant="flat" color="secondary">
-          Sepolia testnet
-        </Chip>
-        <Chip size="sm" variant="flat">
-          Batch #{epochId?.toString() ?? "0"}
-        </Chip>
-        <Chip size="sm" variant="flat">
-          {epochInfo ? `${epochInfo.participants.toString()} sealed orders` : "loading"}
-        </Chip>
-      </div>
-
-      {/* Gate card: connect or balances */}
-      {!connected ? (
-        <Card shadow="sm" className="mb-6 border-small border-default-200">
-          <CardBody className="flex flex-col items-center gap-3 p-8 text-center">
-            <NoxSwapMark size={40} />
-            <p className="text-large font-medium">Ready when you are</p>
-            <p className="max-w-sm text-small text-default-500">
-              Connect a wallet on Sepolia to deposit funds and place your first sealed order.
+  const balancesView = (
+    <div className="flex flex-col gap-6">
+      <Card shadow="sm" className="border-small border-default-200">
+        <CardHeader className="flex items-center justify-between px-4 pb-0 pt-4">
+          <div>
+            <p className="text-large">Your private balance</p>
+            <p className="text-small text-default-500">
+              Visible to you alone. Everyone else sees scrambled data.
             </p>
-            <Button
-              color="primary"
-              radius="full"
-              isLoading={busy === "connect"}
-              startContent={busy !== "connect" ? <Icon icon="solar:wallet-money-bold" width={18} /> : undefined}
-              onPress={onConnect}
-            >
-              Connect wallet
-            </Button>
-          </CardBody>
-        </Card>
-      ) : (
-        <Card shadow="sm" className="mb-6 border-small border-default-200">
-          <CardHeader className="flex items-center justify-between px-4 pb-0 pt-4">
-            <div>
-              <p className="text-large">Your private balance</p>
-              <p className="text-small text-default-500">
-                Visible to you alone. Everyone else sees scrambled data.
-              </p>
-            </div>
-            <Button
-              variant="bordered"
-              radius="full"
-              size="sm"
-              isLoading={busy === "reveal balances"}
-              startContent={busy !== "reveal balances" ? <Icon icon="solar:eye-linear" width={16} /> : undefined}
-              onPress={onReveal}
-            >
-              Show my balance
-            </Button>
-          </CardHeader>
-          <CardBody className="gap-2 p-4">
-            <div className="flex items-center justify-between rounded-medium bg-content2 px-4 py-3">
-              <p className="text-small text-default-500">{TOKEN0_SYMBOL}</p>
-              <p className="font-mono text-medium">{bal0 ?? "•••••"}</p>
-            </div>
-            <div className="flex items-center justify-between rounded-medium bg-content2 px-4 py-3">
-              <p className="text-small text-default-500">{TOKEN1_SYMBOL}</p>
-              <p className="font-mono text-medium">{bal1 ?? "•••••"}</p>
-            </div>
-          </CardBody>
-        </Card>
-      )}
+          </div>
+          <Button
+            variant="bordered"
+            radius="full"
+            size="sm"
+            isDisabled={!connected}
+            isLoading={busy === "show balance"}
+            startContent={busy !== "show balance" ? <Icon icon="solar:eye-linear" width={16} /> : undefined}
+            onPress={onReveal}
+          >
+            Show my balance
+          </Button>
+        </CardHeader>
+        <CardBody className="gap-2 p-4">
+          <div className="flex items-center justify-between rounded-medium bg-content2 px-4 py-3">
+            <p className="text-small text-default-500">{TOKEN0_SYMBOL}</p>
+            <p className="font-mono text-medium">{bal0 ?? "•••••"}</p>
+          </div>
+          <div className="flex items-center justify-between rounded-medium bg-content2 px-4 py-3">
+            <p className="text-small text-default-500">{TOKEN1_SYMBOL}</p>
+            <p className="font-mono text-medium">{bal1 ?? "•••••"}</p>
+          </div>
+        </CardBody>
+      </Card>
 
-      {/* Main form card */}
-      <Card shadow="sm" className="mb-6 border-small border-default-200">
+      <Card shadow="sm" className="border-small border-default-200">
         <CardBody className="p-4">
-          <Tabs aria-label="Actions" variant="underlined" color="primary">
-            <Tab
-              key="swap"
-              title={
-                <div className="flex items-center gap-2">
-                  <Icon icon="solar:lock-keyhole-linear" width={16} />
-                  <span>Sealed order</span>
-                </div>
-              }
-            >
-              <div className="flex flex-col gap-4 pt-2">
-                <Tabs
-                  aria-label="Direction"
-                  selectedKey={sellToken0 ? "sell0" : "sell1"}
-                  onSelectionChange={(k) => setSellToken0(k === "sell0")}
-                  radius="full"
-                  fullWidth
-                  classNames={{
-                    tabList: "bg-content2",
-                    cursor: "!bg-primary",
-                    tab: "data-[selected=true]:!bg-primary rounded-full",
-                    tabContent: "group-data-[selected=true]:!text-white",
-                  }}
-                >
-                  <Tab key="sell0" title={`Sell ${TOKEN0_SYMBOL} for ${TOKEN1_SYMBOL}`} />
-                  <Tab key="sell1" title={`Sell ${TOKEN1_SYMBOL} for ${TOKEN0_SYMBOL}`} />
-                </Tabs>
-                <Input
-                  label={`Amount in ${sellToken0 ? TOKEN0_SYMBOL : TOKEN1_SYMBOL}`}
-                  placeholder="0.0"
-                  variant="bordered"
-                  value={intentAmount}
-                  onValueChange={setIntentAmount}
-                />
-                <Button
-                  color="primary"
-                  radius="full"
-                  isDisabled={!connected || !intentAmount}
-                  isLoading={busy === "place order"}
-                  startContent={busy !== "place order" ? <Icon icon="solar:lock-keyhole-bold" width={18} /> : undefined}
-                  onPress={onSubmitIntent}
-                >
-                  Place sealed order
-                </Button>
-              </div>
-            </Tab>
+          <Tabs aria-label="Move funds" variant="underlined" color="primary">
             <Tab
               key="deposit"
               title={
@@ -423,12 +401,7 @@ export default function App() {
                   onSelectionChange={(k) => setDepositToken(k as "t0" | "t1")}
                   radius="full"
                   fullWidth
-                  classNames={{
-                    tabList: "bg-content2",
-                    cursor: "!bg-primary",
-                    tab: "data-[selected=true]:!bg-primary rounded-full",
-                    tabContent: "group-data-[selected=true]:!text-white",
-                  }}
+                  classNames={segmentedTabClassNames}
                 >
                   <Tab key="t0" title={TOKEN0_SYMBOL} />
                   <Tab key="t1" title={TOKEN1_SYMBOL} />
@@ -468,12 +441,7 @@ export default function App() {
                   onSelectionChange={(k) => setWithdrawToken(k as "t0" | "t1")}
                   radius="full"
                   fullWidth
-                  classNames={{
-                    tabList: "bg-content2",
-                    cursor: "!bg-primary",
-                    tab: "data-[selected=true]:!bg-primary rounded-full",
-                    tabContent: "group-data-[selected=true]:!text-white",
-                  }}
+                  classNames={segmentedTabClassNames}
                 >
                   <Tab key="t0" title={TOKEN0_SYMBOL} />
                   <Tab key="t1" title={TOKEN1_SYMBOL} />
@@ -513,9 +481,12 @@ export default function App() {
           </Tabs>
         </CardBody>
       </Card>
+    </div>
+  );
 
-      {/* Batch card */}
-      <Card shadow="sm" className="mb-6 border-small border-default-200">
+  const batchesView = (
+    <div className="flex flex-col gap-6">
+      <Card shadow="sm" className="border-small border-default-200">
         <CardHeader className="flex flex-col items-start px-4 pb-0 pt-4">
           <p className="text-large">Current batch</p>
           <p className="text-small text-default-500">
@@ -524,6 +495,14 @@ export default function App() {
           </p>
         </CardHeader>
         <CardBody className="gap-3 p-4">
+          <div className="flex items-center gap-2">
+            <Chip size="sm" variant="flat">
+              Batch #{epochId?.toString() ?? "0"}
+            </Chip>
+            <Chip size="sm" variant="flat">
+              {epochInfo?.participants.toString() ?? "0"} sealed orders
+            </Chip>
+          </div>
           <div className="flex gap-3">
             <Button
               variant="bordered"
@@ -551,38 +530,135 @@ export default function App() {
           </div>
         </CardBody>
       </Card>
+    </div>
+  );
 
-      {/* Activity */}
-      <Card shadow="sm" className="border-small border-default-200">
-        <CardHeader className="px-4 pb-0 pt-4">
-          <p className="text-large">Activity</p>
-        </CardHeader>
-        <CardBody className="gap-1 p-4">
-          {log.length === 0 && (
-            <p className="text-small text-default-400">
-              Nothing yet. Connect a wallet and make your first move.
-            </p>
-          )}
-          {log.map((l, i) => (
-            <div key={i} className="flex items-baseline gap-3 py-1">
-              <span className="shrink-0 font-mono text-tiny text-default-400">{l.at}</span>
-              {l.href ? (
-                <a
-                  className="text-small text-primary underline-offset-2 hover:underline"
-                  href={l.href}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {l.msg}
-                </a>
-              ) : (
-                <span className="text-small text-default-600">{l.msg}</span>
-              )}
-            </div>
+  const activityView = (
+    <Card shadow="sm" className="border-small border-default-200">
+      <CardHeader className="px-4 pb-0 pt-4">
+        <p className="text-large">Activity</p>
+      </CardHeader>
+      <CardBody className="gap-1 p-4">
+        {log.length === 0 && (
+          <p className="text-small text-default-400">
+            Nothing yet. Connect a wallet and make your first move.
+          </p>
+        )}
+        {log.map((l, i) => (
+          <div key={i} className="flex items-baseline gap-3 py-1">
+            <span className="shrink-0 font-mono text-tiny text-default-400">{l.at}</span>
+            {l.href ? (
+              <a
+                className="text-small text-primary underline-offset-2 hover:underline"
+                href={l.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {l.msg}
+              </a>
+            ) : (
+              <span className="text-small text-default-600">{l.msg}</span>
+            )}
+          </div>
+        ))}
+        {log.length > 0 && <Divider className="mt-2" />}
+      </CardBody>
+    </Card>
+  );
+
+  const views: Record<View, React.ReactNode> = {
+    trade: tradeView,
+    balances: balancesView,
+    batches: batchesView,
+    activity: activityView,
+  };
+
+  return (
+    <div className="flex min-h-screen">
+      {/* Sidebar (desktop) */}
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 flex-col border-r-small border-divider p-6 lg:flex">
+        <Link href="/" className="flex items-center gap-2 px-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-content1 shadow-small">
+            <NoxSwapMark size={24} />
+          </div>
+          <span className="text-small font-bold uppercase tracking-wide">NoxSwap</span>
+        </Link>
+
+        <div className="mt-8 px-2">{walletBlock}</div>
+
+        <nav className="mt-6 flex flex-col gap-1">
+          {NAV.map((item) => (
+            <Button
+              key={item.key}
+              fullWidth
+              variant={view === item.key ? "flat" : "light"}
+              color={view === item.key ? "primary" : "default"}
+              className={`justify-start ${view === item.key ? "" : "text-default-500 data-[hover=true]:text-foreground"}`}
+              startContent={<Icon icon={item.icon} width={22} />}
+              onPress={() => setView(item.key)}
+            >
+              {item.label}
+            </Button>
           ))}
-          {log.length > 0 && <Divider className="mt-2" />}
-        </CardBody>
-      </Card>
-    </main>
+        </nav>
+
+        <div className="mt-auto flex flex-col gap-3">
+          <Button
+            as={Link}
+            href="/"
+            fullWidth
+            variant="light"
+            className="justify-start text-default-500 data-[hover=true]:text-foreground"
+            startContent={<Icon icon="solar:home-2-linear" width={22} />}
+          >
+            Back to home
+          </Button>
+        </div>
+      </aside>
+
+      {/* Content */}
+      <div className="w-full lg:pl-72">
+        {/* Mobile top bar */}
+        <header className="sticky top-0 z-10 flex flex-col gap-3 border-b-small border-divider p-4 lg:hidden">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-large bg-content1 shadow-small">
+                <NoxSwapMark size={24} />
+              </div>
+              <span className="text-medium font-semibold">NoxSwap</span>
+            </Link>
+            {walletBlock}
+          </div>
+          <Tabs
+            aria-label="Sections"
+            selectedKey={view}
+            onSelectionChange={(k) => setView(k as View)}
+            size="sm"
+            radius="full"
+            fullWidth
+            classNames={segmentedTabClassNames}
+          >
+            {NAV.map((item) => (
+              <Tab key={item.key} title={item.label} />
+            ))}
+          </Tabs>
+        </header>
+
+        <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:py-10">
+          <div className="mb-6 hidden items-center justify-between lg:flex">
+            <h1 className="text-2xl font-semibold capitalize">{view}</h1>
+            <div className="flex gap-2">
+              <Chip size="sm" variant="flat">
+                Batch #{epochId?.toString() ?? "0"}
+              </Chip>
+              <Chip size="sm" variant="flat">
+                {epochInfo?.participants.toString() ?? "0"} sealed orders
+              </Chip>
+            </div>
+          </div>
+          {views[view]}
+        </main>
+      </div>
+    </div>
   );
 }

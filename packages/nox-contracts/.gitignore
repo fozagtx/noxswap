@@ -1,0 +1,21 @@
+# Node modules
+/node_modules
+
+# Compilation output
+/dist
+
+# test coverage output
+/coverage
+
+# Hardhat files
+/artifacts
+/cache
+
+# Nox plugin offchain stack logs
+/offchain-services.log
+
+# macOS
+.DS_Store
+
+# secrets
+.env

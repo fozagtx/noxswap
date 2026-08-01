@@ -1,0 +1,31 @@
+{
+  "name": "nox-hardhat-starter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Hardhat 3 starter for building confidential smart contracts with the iExec Nox toolchain.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc --build . --watch",
+    "test": "hardhat test"
+  },
+  "dependencies": {
+    "@iexec-nox/nox-confidential-contracts": "^0.2.0",
+    "@iexec-nox/nox-protocol-contracts": "^0.2.4",
+    "@openzeppelin/contracts": "^5.6.1",
+    "viem": "^2.46.3"
+  },
+  "devDependencies": {
+    "@iexec-nox/nox-hardhat-plugin": "^0.1.0-beta.2",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.3",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.11.0",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.4.0",
+    "typescript": "~5.8.0"
+  },
+  "overrides": {
+    "@nomicfoundation/hardhat-node-test-runner": "3.0.9"
+  }
+}

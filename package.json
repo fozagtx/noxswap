@@ -1,0 +1,7 @@
+{
+  "name": "noxswap",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A dark pool over Uniswap: encrypted swap intents, TEE batch netting, residual-only execution. Built on iExec Nox.",
+  "workspaces": []
+}

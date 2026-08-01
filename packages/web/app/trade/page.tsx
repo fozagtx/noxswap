@@ -139,6 +139,13 @@ export default function App() {
         setAccount(a);
       })
       .catch(() => router.replace("/"));
+    const onChange = () => window.location.reload();
+    ethereum.on?.("accountsChanged", onChange);
+    ethereum.on?.("chainChanged", onChange);
+    return () => {
+      ethereum.removeListener?.("accountsChanged", onChange);
+      ethereum.removeListener?.("chainChanged", onChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

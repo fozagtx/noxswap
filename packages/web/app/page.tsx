@@ -85,6 +85,13 @@ export default function Landing() {
       .request({ method: "eth_accounts" })
       .then((accounts: string[]) => setConnected(accounts.length > 0))
       .catch(() => setConnected(false));
+    const onChange = () => window.location.reload();
+    ethereum.on?.("accountsChanged", onChange);
+    ethereum.on?.("chainChanged", onChange);
+    return () => {
+      ethereum.removeListener?.("accountsChanged", onChange);
+      ethereum.removeListener?.("chainChanged", onChange);
+    };
   }, []);
 
   const enter = async () => {

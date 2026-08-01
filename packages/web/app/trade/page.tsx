@@ -49,7 +49,7 @@ const NAV: { key: View; label: string; icon: string }[] = [
   { key: "activity", label: "Activity", icon: "solar:history-linear" },
 ];
 
-const TOKEN0_ICON = "token-branded:weth";
+const TOKEN0_ICON = "token-branded:eth";
 const TOKEN1_ICON = "token-branded:usdc";
 
 const segmentedTabClassNames = {

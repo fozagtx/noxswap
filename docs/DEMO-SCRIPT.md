@@ -4,7 +4,18 @@ Deployed: NoxSwapVault `0xdce40a86655121acb4745ff641ec9ccb0267182a` (Sepolia)
 Uniswap WETH/USDC 0.3% pool: `0x6Ce0896eAE6D4BD668fDe41BB784548fb8F59b50`
 Vault on Etherscan: https://sepolia.etherscan.io/address/0xdce40a86655121acb4745ff641ec9ccb0267182a
 
-Fill in the tx links from the e2e run output before recording.
+Live app: https://noxswap.vercel.app · Repo: https://github.com/fozagtx/noxswap
+
+Real transaction trail from the verified two-party run (epoch #0):
+- Alice deposit WETH: https://sepolia.etherscan.io/tx/0x7ffde6f91bee0dc99dbfcdda333bc5abdd3883d0e4e3d21142f8fc0d48001176
+- Bob deposit USDC: https://sepolia.etherscan.io/tx/0xbdd06e2562a6b34d492eb1a343178843a5297613c8d9215c61c200a015f7aba9
+- Alice sealed intent (sell WETH): https://sepolia.etherscan.io/tx/0x8c356f4f70f03098e551eb2ac6de5bba1fc235bcf7c7e4c00f3a9f17075a5f28
+- Bob sealed intent (sell USDC): https://sepolia.etherscan.io/tx/0x63fdbd64ec0c2c5fba24c111c0748339309728341dc0073c336288d615cd096e
+- Epoch closed (aggregates only): https://sepolia.etherscan.io/tx/0x2ed16bf7848206737884e3979e95328e54f94cef2ddc90878cf9d30398d9832e
+- Settlement (netted + residual on Uniswap): https://sepolia.etherscan.io/tx/0x6a3085ca85fa1b00e347d28ea96213e10446f3eea44b7a81e3b972d393d7ba6a
+- Result: aggregates 0.004 WETH vs 1 USDC → Bob crossed internally at spot
+  (got 0.0000434 WETH, zero slippage); only ~0.00396 WETH residual hit
+  Uniswap; Alice cleared 91.79 USDC — all balances confidential.
 
 ---
 

@@ -17,7 +17,8 @@ Swap without showing your hand:
 
 Live on Sepolia. Demo + code below 👇
 
-GitHub: <REPO_URL>
+Try it: https://noxswap.vercel.app
+GitHub: https://github.com/fozagtx/noxswap
 Demo: <VIDEO_LINK>
 
 #WTFHackathon #ConfidentialDeFi #Nox

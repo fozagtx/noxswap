@@ -1,65 +1,100 @@
-# Demo video script (max 4:00)
+# Final demo script (max 4:00)
 
-Deployed: NoxSwapVault `0xdce40a86655121acb4745ff641ec9ccb0267182a` (Sepolia)
-Uniswap WETH/USDC 0.3% pool: `0x6Ce0896eAE6D4BD668fDe41BB784548fb8F59b50`
-Vault on Etherscan: https://sepolia.etherscan.io/address/0xdce40a86655121acb4745ff641ec9ccb0267182a
+Read the SAY lines out loud, do the DO lines on screen. Practice once, then
+record with Cmd+Shift+5 (browser window + microphone).
 
-Live app: https://noxswap.vercel.app · Repo: https://github.com/fozagtx/noxswap
-
-Real transaction trail from the verified two-party run (epoch #0):
-- Alice deposit WETH: https://sepolia.etherscan.io/tx/0x7ffde6f91bee0dc99dbfcdda333bc5abdd3883d0e4e3d21142f8fc0d48001176
-- Bob deposit USDC: https://sepolia.etherscan.io/tx/0xbdd06e2562a6b34d492eb1a343178843a5297613c8d9215c61c200a015f7aba9
-- Alice sealed intent (sell WETH): https://sepolia.etherscan.io/tx/0x8c356f4f70f03098e551eb2ac6de5bba1fc235bcf7c7e4c00f3a9f17075a5f28
-- Bob sealed intent (sell USDC): https://sepolia.etherscan.io/tx/0x63fdbd64ec0c2c5fba24c111c0748339309728341dc0073c336288d615cd096e
-- Epoch closed (aggregates only): https://sepolia.etherscan.io/tx/0x2ed16bf7848206737884e3979e95328e54f94cef2ddc90878cf9d30398d9832e
-- Settlement (netted + residual on Uniswap): https://sepolia.etherscan.io/tx/0x6a3085ca85fa1b00e347d28ea96213e10446f3eea44b7a81e3b972d393d7ba6a
-- Result: aggregates 0.004 WETH vs 1 USDC → Bob crossed internally at spot
-  (got 0.0000434 WETH, zero slippage); only ~0.00396 WETH residual hit
-  Uniswap; Alice cleared 91.79 USDC. all balances confidential.
+Accounts in MetaMask: Alice `0xdE15…7274` (start on her), Bob `0xb4BC…a5a6`.
+App: https://noxswap.vercel.app · Repo: https://github.com/fozagtx/noxswap
+Vault: https://sepolia.etherscan.io/address/0xdce40a86655121acb4745ff641ec9ccb0267182a
 
 ---
 
-**0:00–0:35. The problem.**
-Screen: Etherscan of any normal Uniswap swap.
-"Every swap on Uniswap is public before and after it executes: who, which
-direction, how much. That's what sandwich bots feed on, and it's why funds
-can't rebalance without broadcasting their strategy. NoxSwap fixes the leak
-without touching Uniswap."
+## 0:00 — The problem
 
-**0:35–1:20. Deposit + sealed intent (UI).**
-Screen: NoxSwap UI, wallet A connected.
-- Deposit WETH. Point at the balance card: "on-chain, my balance is this
-  opaque 32-byte handle. only I can decrypt it. Computation happens inside
-  Intel TDX enclaves via iExec's Nox protocol."
-- Submit intent, toggle direction: "amount AND direction are encrypted in the
-  browser before anything is sent. The chain sees a handle, nothing else."
-- Show the submitIntent tx on Etherscan: only bytes32 handles visible.
+DO: Show any ordinary swap transaction on sepolia.etherscan.io.
 
-**1:20–1:50. Second party (wallet B).**
-Screen: switch account, submit the opposing intent (sell USDC).
-"A second trader takes the other side. Neither of us. nor anyone watching.
-can see the other's order."
+SAY: "This is a normal swap on Uniswap. Anyone in the world can see who
+traded, what they sold, how much, and in which direction. That is why
+sandwich bots exist, and why serious traders will not bring size on chain.
+I built NoxSwap to fix that, without changing Uniswap at all."
 
-**1:50–2:50. Close + settle: the netting proof.**
-Screen: Batches panel → Close epoch → Settle.
-- "Closing the epoch reveals exactly two numbers: the aggregate sum per side.
-  Individual intents stay sealed forever."
-- "Settlement is permissionless. the browser fetches decryption proofs from
-  the gateway, and the contract verifies them on-chain before acting."
-- Etherscan on the settle tx: "here's the kicker. my order was X WETH, but
-  the pool only saw the residual, because the opposing flow crossed privately
-  at spot inside the enclave. Zero slippage, zero MEV on the crossed portion.
-  Uniswap: completely unmodified."
+## 0:25 — The product
 
-**2:50–3:25. After: balances + withdrawal + auditor.**
-- Decrypt balances in both wallets: correct fills at the uniform price.
-- Two-phase withdrawal: "only the withdrawn amount is revealed. which an
-  ERC-20 transfer makes public anyway. The running balance never is."
-- One line on `grantAuditorView`: "selective disclosure for compliance via
-  the on-chain ACL."
+DO: Open noxswap.vercel.app, scroll the landing once, press Connect wallet
+as Alice.
 
-**3:25–4:00. Close.**
-Architecture slide (contract diagram from README).
-"Encrypted intents. TEE netting. Residual-only execution. Trustless proof
-verification. Built on iExec Nox, live on Sepolia, code on GitHub. This is
-how privacy composes with public DeFi."
+SAY: "This is NoxSwap, a dark pool that sits on top of Uniswap. You trade
+without showing your hand. Let me show you with two traders, Alice and Bob."
+
+## 0:45 — Alice seals an order
+
+DO: Balances, Deposit tab, WETH, amount 0.002, Deposit. Confirm both popups.
+
+SAY: "Alice deposits into the vault. From this moment her balance is
+scrambled. The chain stores an encrypted reference that only she can decode."
+
+DO: Trade, Sell WETH for USDC, amount 0.001, Place sealed order. Confirm.
+
+SAY: "Now she places an order: sell WETH for USDC. The amount and the
+direction are sealed in her browser before anything is sent."
+
+DO: Click the new transaction link in Activity, show it on Etherscan.
+
+SAY: "Here is that order on chain. No amount. No direction. Just a sealed
+envelope. There is nothing here for a bot to attack."
+
+## 1:45 — Bob takes the other side
+
+DO: Switch MetaMask to Bob. The page reloads by itself. Connect. Balances,
+Deposit, USDC, amount 5, Deposit. Then Trade, Sell USDC for WETH, amount 5,
+Place sealed order.
+
+SAY: "Bob takes the other side. He deposits five USDC and places the
+opposite order. Neither of them can see the other's order. Nobody can."
+
+## 2:20 — Close and settle
+
+DO: Batches, Close batch, confirm.
+
+SAY: "The batch closes. Only two numbers ever become public: the total on
+each side. The individual orders stay sealed forever."
+
+DO: Settle batch. While the spinner runs, keep talking. Confirm the
+transaction when it appears.
+
+SAY: "Settlement is open to anyone. The proofs come out of a secure enclave
+and the contract verifies them itself before it acts, so there is no
+operator to trust. Inside the batch, Alice and Bob just matched each other
+at the market price. Zero slippage, zero MEV. Only the tiny unmatched
+leftover goes out to Uniswap."
+
+DO: Open the settle transaction from Activity on Etherscan.
+
+SAY: "And here is the proof. Alice sold a thousandth of an ETH, but the pool
+only received the leftover after Bob's five dollars matched her privately."
+
+## 3:20 — The payoff
+
+DO: Balances, Show my balance as Bob. Then switch MetaMask to Alice, Show my
+balance again.
+
+SAY: "Bob decodes his balance and his WETH is there. Alice decodes hers,
+paid in USDC at the same fair price. Each of them sees only their own
+numbers. Everyone else sees scrambled data."
+
+## 3:45 — Close
+
+DO: Show the landing page or the GitHub repo.
+
+SAY: "NoxSwap. Sealed orders, private matching, and a public footprint that
+gives bots nothing to eat. Live on Sepolia, built on iExec Nox, with Uniswap
+completely unmodified. The code is open, links below."
+
+---
+
+## After recording
+
+1. Trim to under 4:00 in QuickTime (Edit, Trim), export as .mp4
+2. Post on X: copy docs/X-POST.md, attach the video, tag @iEx_ec
+3. Submit on DoraHacks: repo link, X post link, https://noxswap.vercel.app
+4. Deadline 21:59 tonight

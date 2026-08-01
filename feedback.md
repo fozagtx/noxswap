@@ -25,7 +25,7 @@ hit it.
    required network.
 5. **The clamp pattern documented in `ConfidentialPiggyBank`** (safeSub +
    select instead of revert, "same as ERC-7984 `_update`") is exactly the
-   guidance developers need — reverting on encrypted comparisons leaks
+   guidance developers need. reverting on encrypted comparisons leaks
    information, and the example says so explicitly.
 6. **Compiles clean on Solidity 0.8.35** with no warnings from the Nox library
    itself.
@@ -72,7 +72,7 @@ hit it.
 8. **`ViemBlockchainService` binds proofs to `getAddresses()[0]`, not the
    client's own account.** With a multi-account provider (Hardhat's viem
    wallet clients share one provider listing every configured account), a
-   handle client created for account B still emits proofs bound to account A —
+   handle client created for account B still emits proofs bound to account A.
    and the resulting `submitIntent` reverts on-chain from the *other* wallet.
    Cost us a full Sepolia run to diagnose. Suggest preferring
    `walletClient.account` when present (it already is at the signing call

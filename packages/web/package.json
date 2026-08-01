@@ -9,7 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroui/react": "^2.8.5",
+    "@heroui/theme": "^2.4.26",
+    "@iconify/react": "^6.0.2",
     "@iexec-nox/handle": "^0.1.0-beta.13",
+    "@react-aria/ssr": "^3.10.1",
+    "@react-aria/utils": "^3.34.1",
+    "@react-aria/visually-hidden": "^3.9.1",
+    "@react-stately/utils": "^3.12.1",
+    "framer-motion": "^12.43.0",
     "graphql": "^17.0.2",
     "next": "^14.2.5",
     "react": "^18.3.1",

@@ -1,0 +1,61 @@
+- generic [active] [ref=e1]:
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "NoxSwap logo" [ref=e7]
+        - paragraph [ref=e12]: NoxSwap
+      - button "Connect wallet" [ref=e13] [cursor=pointer]
+    - generic [ref=e14]:
+      - generic [ref=e15]: Sepolia testnet
+      - generic [ref=e17]: "Batch #0"
+      - generic [ref=e19]: loading
+    - generic [ref=e21]:
+      - heading "Trade without showing your hand" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Your order size and direction stay sealed. Orders pair off privately inside the vault, and only the leftover ever trades on Uniswap.
+    - generic [ref=e24]:
+      - generic [ref=e28]:
+        - paragraph [ref=e29]: Sealed orders
+        - paragraph [ref=e30]: Nobody sees your size or direction. Not bots, not us.
+      - generic [ref=e34]:
+        - paragraph [ref=e35]: Private matching
+        - paragraph [ref=e36]: Opposite orders pair off at the market price with zero slippage.
+      - generic [ref=e40]:
+        - paragraph [ref=e41]: Tiny public footprint
+        - paragraph [ref=e42]: Only the unmatched remainder is traded publicly on Uniswap.
+    - generic [ref=e44]:
+      - img "NoxSwap logo" [ref=e45]
+      - paragraph [ref=e50]: Ready when you are
+      - paragraph [ref=e51]: Connect a wallet on Sepolia to deposit funds and place your first sealed order.
+      - button "Connect wallet" [ref=e52] [cursor=pointer]
+    - generic [ref=e54]:
+      - generic "Actions" [ref=e55]:
+        - tablist "Actions" [ref=e56]:
+          - tab "Sealed order" [selected] [ref=e57] [cursor=pointer]
+          - tab "Deposit" [ref=e61] [cursor=pointer]
+          - tab "Withdraw" [ref=e65] [cursor=pointer]
+      - tabpanel "Sealed order" [ref=e69]:
+        - generic [ref=e70]:
+          - generic "Direction" [ref=e71]:
+            - tablist "Direction" [ref=e72]:
+              - tab "Sell WETH for USDC" [selected] [ref=e73] [cursor=pointer]
+              - tab "Sell USDC for WETH" [ref=e75] [cursor=pointer]
+          - generic [ref=e78]:
+            - generic [ref=e79]: Amount in WETH
+            - textbox "Amount in WETH" [ref=e81]:
+              - /placeholder: "0.0"
+          - button "Place sealed order" [disabled]
+    - generic [ref=e82]:
+      - generic [ref=e83]:
+        - paragraph [ref=e84]: Current batch
+        - paragraph [ref=e85]: Anyone can close and settle a batch. Matched orders pair privately, the rest trades on Uniswap.
+      - generic [ref=e86]:
+        - generic [ref=e87]:
+          - generic [ref=e88]: "Batch #0"
+          - generic [ref=e90]: 0 orders
+        - generic [ref=e92]:
+          - button "Close batch" [disabled]
+          - 'button "Settle batch #0" [disabled]'
+    - generic [ref=e93]:
+      - paragraph [ref=e95]: Activity
+      - paragraph [ref=e97]: Nothing yet. Connect a wallet and make your first move.
+  - alert [ref=e98]

@@ -1,17 +1,17 @@
 /*
-  design-promax Pro themes — skill-local pack
+  design-promax Pro themes - skill-local pack
   Source of truth: THEMES.json (Default | Brutalism | Glass | Mouve)
   Activate: <html data-theme="default-light|brutalism-light|glass-light|mouve-light">
   Stack: HeroUI v2 + Tailwind 3 (skill sources). Optional upgrade: @heroui-pro/react/themes/*
 */
 
-/* —— Default —— */
+/* -- Default -- */
 html[data-theme="default-light"],
 html[data-theme="light"] {
   color-scheme: light;
 }
 
-/* —— Brutalism —— */
+/* -- Brutalism -- */
 html[data-theme="brutalism-light"] {
   color-scheme: light;
   --dp-radius: 0px;
@@ -50,7 +50,7 @@ html[data-theme="brutalism-light"] [role="button"] {
   border-radius: 0 !important;
 }
 
-/* —— Glass —— */
+/* -- Glass -- */
 html[data-theme="glass-light"] {
   color-scheme: light;
   --glass-blur: 18px;
@@ -81,7 +81,7 @@ html[data-theme="glass-light"] header {
   -webkit-backdrop-filter: blur(20px);
 }
 
-/* —— Mouve —— */
+/* -- Mouve -- */
 html[data-theme="mouve-light"] {
   color-scheme: light;
   --mouve-raised-shadow:

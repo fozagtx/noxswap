@@ -5,3 +5,5 @@ node_modules/
 
 # local prep notes, not part of the submission
 docs/
+.playwright-mcp/
+*.jpeg

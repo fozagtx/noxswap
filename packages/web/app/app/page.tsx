@@ -191,7 +191,7 @@ export default function App() {
         const d1 = await withHandleRetry(() => nox.decrypt(handles[1] as any));
         setBal1(formatUnits(d1.value as bigint, TOKEN1_DECIMALS));
       } else setBal1("0");
-      say("Balances revealed on your screen only. They stay private on chain.");
+      say("Decoded on your screen only. On chain they stay scrambled.");
     });
 
   const onCloseEpoch = () =>
@@ -331,7 +331,7 @@ export default function App() {
             <div>
               <p className="text-large">Your private balance</p>
               <p className="text-small text-default-500">
-                Only you can reveal it, and only on your screen.
+                Visible to you alone. Everyone else sees scrambled data.
               </p>
             </div>
             <Button
@@ -342,7 +342,7 @@ export default function App() {
               startContent={busy !== "reveal balances" ? <Icon icon="solar:eye-linear" width={16} /> : undefined}
               onPress={onReveal}
             >
-              Reveal
+              Show my balance
             </Button>
           </CardHeader>
           <CardBody className="gap-2 p-4">

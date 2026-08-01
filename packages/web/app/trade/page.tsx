@@ -59,6 +59,7 @@ const segmentedTabClassNames = {
 export default function App() {
   const router = useRouter();
   const publicClient = useMemo(() => getPublicClient(), []);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [view, setView] = useState<View>("trade");
   const [wallet, setWallet] = useState<WalletClient | null>(null);
   const [account, setAccount] = useState<`0x${string}` | null>(null);
@@ -576,48 +577,94 @@ export default function App() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar (desktop) */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 flex-col border-r-small border-divider p-6 lg:flex">
-        <Link href="/" className="flex items-center gap-2 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-content1 shadow-small">
-            <NoxSwapMark size={24} />
-          </div>
-          <span className="text-small font-bold uppercase tracking-wide">NoxSwap</span>
-        </Link>
+      <aside
+        className={`fixed inset-y-0 left-0 z-20 hidden flex-col border-r-small border-divider transition-all duration-200 lg:flex ${sidebarOpen ? "w-72 p-6" : "w-[4.25rem] items-center px-2 py-6"}`}
+      >
+        <div className={`flex items-center ${sidebarOpen ? "justify-between px-2" : "flex-col gap-3"}`}>
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-content1 shadow-small">
+              <NoxSwapMark size={24} />
+            </div>
+            {sidebarOpen && (
+              <span className="text-small font-bold uppercase tracking-wide">NoxSwap</span>
+            )}
+          </Link>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+            className="text-default-500"
+            onPress={() => setSidebarOpen((v) => !v)}
+          >
+            <Icon
+              icon={sidebarOpen ? "solar:square-double-alt-arrow-left-linear" : "solar:square-double-alt-arrow-right-linear"}
+              width={20}
+            />
+          </Button>
+        </div>
 
-        <div className="mt-8 px-2">{walletBlock}</div>
+        {sidebarOpen && <div className="mt-8 px-2">{walletBlock}</div>}
 
-        <nav className="mt-6 flex flex-col gap-1">
-          {NAV.map((item) => (
-            <Button
-              key={item.key}
-              fullWidth
-              variant={view === item.key ? "flat" : "light"}
-              color={view === item.key ? "primary" : "default"}
-              className={`justify-start ${view === item.key ? "" : "text-default-500 data-[hover=true]:text-foreground"}`}
-              startContent={<Icon icon={item.icon} width={22} />}
-              onPress={() => setView(item.key)}
-            >
-              {item.label}
-            </Button>
-          ))}
+        <nav className={`mt-6 flex flex-col gap-1 ${sidebarOpen ? "" : "items-center"}`}>
+          {NAV.map((item) =>
+            sidebarOpen ? (
+              <Button
+                key={item.key}
+                fullWidth
+                variant={view === item.key ? "flat" : "light"}
+                color={view === item.key ? "primary" : "default"}
+                className={`justify-start ${view === item.key ? "" : "text-default-500 data-[hover=true]:text-foreground"}`}
+                startContent={<Icon icon={item.icon} width={22} />}
+                onPress={() => setView(item.key)}
+              >
+                {item.label}
+              </Button>
+            ) : (
+              <Button
+                key={item.key}
+                isIconOnly
+                aria-label={item.label}
+                variant={view === item.key ? "flat" : "light"}
+                color={view === item.key ? "primary" : "default"}
+                className={view === item.key ? "" : "text-default-500 data-[hover=true]:text-foreground"}
+                onPress={() => setView(item.key)}
+              >
+                <Icon icon={item.icon} width={22} />
+              </Button>
+            ),
+          )}
         </nav>
 
-        <div className="mt-auto flex flex-col gap-3">
-          <Button
-            as={Link}
-            href="/"
-            fullWidth
-            variant="light"
-            className="justify-start text-default-500 data-[hover=true]:text-foreground"
-            startContent={<Icon icon="solar:home-2-linear" width={22} />}
-          >
-            Back to home
-          </Button>
+        <div className={`mt-auto flex flex-col gap-3 ${sidebarOpen ? "" : "items-center"}`}>
+          {sidebarOpen ? (
+            <Button
+              as={Link}
+              href="/"
+              fullWidth
+              variant="light"
+              className="justify-start text-default-500 data-[hover=true]:text-foreground"
+              startContent={<Icon icon="solar:home-2-linear" width={22} />}
+            >
+              Back to home
+            </Button>
+          ) : (
+            <Button
+              as={Link}
+              href="/"
+              isIconOnly
+              aria-label="Back to home"
+              variant="light"
+              className="text-default-500 data-[hover=true]:text-foreground"
+            >
+              <Icon icon="solar:home-2-linear" width={22} />
+            </Button>
+          )}
         </div>
       </aside>
 
       {/* Content */}
-      <div className="w-full lg:pl-72">
+      <div className={`w-full transition-all duration-200 ${sidebarOpen ? "lg:pl-72" : "lg:pl-[4.25rem]"}`}>
         {/* Mobile top bar */}
         <header className="sticky top-0 z-10 flex flex-col gap-3 border-b-small border-divider p-4 lg:hidden">
           <div className="flex items-center justify-between">

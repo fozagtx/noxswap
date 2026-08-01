@@ -101,7 +101,7 @@ export default function Landing() {
     }
   };
 
-  const cta = (size: "md" | "lg") => (
+  const cta = (size: "lg") => (
     <Button
       color="primary"
       radius="full"
@@ -136,7 +136,6 @@ export default function Landing() {
             </div>
             <p className="text-large font-semibold">NoxSwap</p>
           </div>
-          {cta("md")}
         </div>
 
         {/* Hero */}
@@ -199,7 +198,6 @@ export default function Landing() {
               </Card>
             ))}
           </div>
-          <div className="mt-10 flex justify-center">{cta("lg")}</div>
         </section>
 
         {/* Footer */}
@@ -234,13 +232,6 @@ export default function Landing() {
                 <Icon icon="solar:document-text-linear" width={18} />
                 Nox docs
               </a>
-              <button
-                className="flex items-center gap-2 text-small text-default-500 transition hover:text-foreground"
-                onClick={enter}
-              >
-                <Icon icon="solar:arrow-right-up-linear" width={18} />
-                Dashboard
-              </button>
             </div>
           </div>
           <p className="mt-8 text-center text-tiny text-default-400">

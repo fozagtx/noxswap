@@ -79,8 +79,12 @@ sequenceDiagram
 - App: https://noxswap.vercel.app
 - Vault: [`0xdce40a86655121acb4745ff641ec9ccb0267182a`](https://sepolia.etherscan.io/address/0xdce40a86655121acb4745ff641ec9ccb0267182a)
 - Uniswap V3 WETH/USDC 0.3% pool: `0x6Ce0896eAE6D4BD668fDe41BB784548fb8F59b50`
-- A verified two-party run with the full transaction trail is documented in
-  `docs/DEMO-SCRIPT.md`.
+- Verified two-party run on Sepolia: sealed intents from two wallets
+  ([Alice's order](https://sepolia.etherscan.io/tx/0x8c356f4f70f03098e551eb2ac6de5bba1fc235bcf7c7e4c00f3a9f17075a5f28),
+  [Bob's order](https://sepolia.etherscan.io/tx/0x63fdbd64ec0c2c5fba24c111c0748339309728341dc0073c336288d615cd096e)),
+  aggregates of 0.004 WETH vs 1 USDC revealed at close, and a
+  [settlement](https://sepolia.etherscan.io/tx/0x6a3085ca85fa1b00e347d28ea96213e10446f3eea44b7a81e3b972d393d7ba6a)
+  that crossed the USDC side internally and sent only the residual to Uniswap.
 
 ## Repository layout
 

@@ -49,6 +49,9 @@ const NAV: { key: View; label: string; icon: string }[] = [
   { key: "activity", label: "Activity", icon: "solar:history-linear" },
 ];
 
+const TOKEN0_ICON = "token-branded:weth";
+const TOKEN1_ICON = "token-branded:usdc";
+
 const segmentedTabClassNames = {
   tabList: "bg-content2",
   cursor: "!bg-primary",
@@ -331,13 +334,30 @@ export default function App() {
             fullWidth
             classNames={segmentedTabClassNames}
           >
-            <Tab key="sell0" title={`Sell ${TOKEN0_SYMBOL} for ${TOKEN1_SYMBOL}`} />
-            <Tab key="sell1" title={`Sell ${TOKEN1_SYMBOL} for ${TOKEN0_SYMBOL}`} />
+            <Tab
+              key="sell0"
+              title={
+                <div className="flex items-center gap-2">
+                  <Icon icon={TOKEN0_ICON} width={18} />
+                  <span>{`Sell ${TOKEN0_SYMBOL} for ${TOKEN1_SYMBOL}`}</span>
+                </div>
+              }
+            />
+            <Tab
+              key="sell1"
+              title={
+                <div className="flex items-center gap-2">
+                  <Icon icon={TOKEN1_ICON} width={18} />
+                  <span>{`Sell ${TOKEN1_SYMBOL} for ${TOKEN0_SYMBOL}`}</span>
+                </div>
+              }
+            />
           </Tabs>
           <Input
             label={`Amount in ${sellToken0 ? TOKEN0_SYMBOL : TOKEN1_SYMBOL}`}
             placeholder="0.0"
             variant="bordered"
+            startContent={<Icon icon={sellToken0 ? TOKEN0_ICON : TOKEN1_ICON} width={20} />}
             value={intentAmount}
             onValueChange={setIntentAmount}
           />
@@ -380,11 +400,17 @@ export default function App() {
         </CardHeader>
         <CardBody className="gap-2 p-4">
           <div className="flex items-center justify-between rounded-medium bg-content2 px-4 py-3">
-            <p className="text-small text-default-500">{TOKEN0_SYMBOL}</p>
+            <div className="flex items-center gap-2">
+              <Icon icon={TOKEN0_ICON} width={22} />
+              <p className="text-small text-default-500">{TOKEN0_SYMBOL}</p>
+            </div>
             <p className="font-mono text-medium">{bal0 ?? "•••••"}</p>
           </div>
           <div className="flex items-center justify-between rounded-medium bg-content2 px-4 py-3">
-            <p className="text-small text-default-500">{TOKEN1_SYMBOL}</p>
+            <div className="flex items-center gap-2">
+              <Icon icon={TOKEN1_ICON} width={22} />
+              <p className="text-small text-default-500">{TOKEN1_SYMBOL}</p>
+            </div>
             <p className="font-mono text-medium">{bal1 ?? "•••••"}</p>
           </div>
         </CardBody>
@@ -411,13 +437,30 @@ export default function App() {
                   fullWidth
                   classNames={segmentedTabClassNames}
                 >
-                  <Tab key="t0" title={TOKEN0_SYMBOL} />
-                  <Tab key="t1" title={TOKEN1_SYMBOL} />
+                  <Tab
+                    key="t0"
+                    title={
+                      <div className="flex items-center gap-2">
+                        <Icon icon={TOKEN0_ICON} width={18} />
+                        <span>{TOKEN0_SYMBOL}</span>
+                      </div>
+                    }
+                  />
+                  <Tab
+                    key="t1"
+                    title={
+                      <div className="flex items-center gap-2">
+                        <Icon icon={TOKEN1_ICON} width={18} />
+                        <span>{TOKEN1_SYMBOL}</span>
+                      </div>
+                    }
+                  />
                 </Tabs>
                 <Input
                   label={`Amount in ${depositToken === "t0" ? TOKEN0_SYMBOL : TOKEN1_SYMBOL}`}
                   placeholder="0.0"
                   variant="bordered"
+                  startContent={<Icon icon={depositToken === "t0" ? TOKEN0_ICON : TOKEN1_ICON} width={20} />}
                   value={depositAmount}
                   onValueChange={setDepositAmount}
                 />
@@ -451,13 +494,30 @@ export default function App() {
                   fullWidth
                   classNames={segmentedTabClassNames}
                 >
-                  <Tab key="t0" title={TOKEN0_SYMBOL} />
-                  <Tab key="t1" title={TOKEN1_SYMBOL} />
+                  <Tab
+                    key="t0"
+                    title={
+                      <div className="flex items-center gap-2">
+                        <Icon icon={TOKEN0_ICON} width={18} />
+                        <span>{TOKEN0_SYMBOL}</span>
+                      </div>
+                    }
+                  />
+                  <Tab
+                    key="t1"
+                    title={
+                      <div className="flex items-center gap-2">
+                        <Icon icon={TOKEN1_ICON} width={18} />
+                        <span>{TOKEN1_SYMBOL}</span>
+                      </div>
+                    }
+                  />
                 </Tabs>
                 <Input
                   label={`Amount in ${withdrawToken === "t0" ? TOKEN0_SYMBOL : TOKEN1_SYMBOL}`}
                   placeholder="0.0"
                   variant="bordered"
+                  startContent={<Icon icon={withdrawToken === "t0" ? TOKEN0_ICON : TOKEN1_ICON} width={20} />}
                   value={withdrawAmount}
                   onValueChange={setWithdrawAmount}
                 />

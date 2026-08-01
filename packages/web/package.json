@@ -17,7 +17,7 @@
     "@react-aria/utils": "^3.34.1",
     "@react-aria/visually-hidden": "^3.9.1",
     "@react-stately/utils": "^3.12.1",
-    "framer-motion": "^12.43.0",
+    "framer-motion": "^11.18.2",
     "graphql": "^17.0.2",
     "next": "^14.2.5",
     "react": "^18.3.1",

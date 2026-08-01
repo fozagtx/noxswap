@@ -377,7 +377,13 @@ export default function App() {
                   selectedKey={sellToken0 ? "sell0" : "sell1"}
                   onSelectionChange={(k) => setSellToken0(k === "sell0")}
                   radius="full"
-                  color="primary"
+                  fullWidth
+                  classNames={{
+                    tabList: "bg-content2",
+                    cursor: "!bg-primary",
+                    tab: "data-[selected=true]:!bg-primary rounded-full",
+                    tabContent: "group-data-[selected=true]:!text-white",
+                  }}
                 >
                   <Tab key="sell0" title={`Sell ${TOKEN0_SYMBOL} for ${TOKEN1_SYMBOL}`} />
                   <Tab key="sell1" title={`Sell ${TOKEN1_SYMBOL} for ${TOKEN0_SYMBOL}`} />
@@ -416,6 +422,13 @@ export default function App() {
                   selectedKey={depositToken}
                   onSelectionChange={(k) => setDepositToken(k as "t0" | "t1")}
                   radius="full"
+                  fullWidth
+                  classNames={{
+                    tabList: "bg-content2",
+                    cursor: "!bg-primary",
+                    tab: "data-[selected=true]:!bg-primary rounded-full",
+                    tabContent: "group-data-[selected=true]:!text-white",
+                  }}
                 >
                   <Tab key="t0" title={TOKEN0_SYMBOL} />
                   <Tab key="t1" title={TOKEN1_SYMBOL} />
@@ -454,6 +467,13 @@ export default function App() {
                   selectedKey={withdrawToken}
                   onSelectionChange={(k) => setWithdrawToken(k as "t0" | "t1")}
                   radius="full"
+                  fullWidth
+                  classNames={{
+                    tabList: "bg-content2",
+                    cursor: "!bg-primary",
+                    tab: "data-[selected=true]:!bg-primary rounded-full",
+                    tabContent: "group-data-[selected=true]:!text-white",
+                  }}
                 >
                   <Tab key="t0" title={TOKEN0_SYMBOL} />
                   <Tab key="t1" title={TOKEN1_SYMBOL} />
